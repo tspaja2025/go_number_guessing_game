@@ -25,6 +25,8 @@ type Leaderboard struct {
 	MaxSize int                `json:"max_size"` // Top N entries
 }
 
+const leaderboardFile = "leaderboard.json"
+
 func main() {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 	reader := bufio.NewReader(os.Stdin)
@@ -39,7 +41,7 @@ func main() {
 		answer = strings.TrimSpace(strings.ToLower(answer))
 
 		if answer != "y" && answer != "yes" {
-			fmt.Println("Thanks for playing")
+			fmt.Println("Thanks for playing!")
 			break
 		}
 	}
