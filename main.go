@@ -11,23 +11,41 @@ import (
 )
 
 func main() {
-	min, max := 1, 100
-
-	randomizer := rand.New(rand.NewSource(time.Now().UnixNano()))
-	randomNumber := randomizer.Intn(max-min+1) + min
-	fmt.Println("The random number is", randomNumber)
-
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Println("Welcome to Number Guessing Game")
-	fmt.Println("Guess a number between 1 and 100")
 
-	for attemps := 1; ; attemps++ {
-		fmt.Printf("Attempt %d: Please enter your guess: ", attemps)
+	for {
+		handleGame(reader)
+
+		fmt.Print("\nWould you like to play again? (y/n): ")
+		answer, _ := reader.ReadString('\n')
+		answer = strings.TrimSpace(strings.ToLower(answer))
+
+		if answer != "y" && answer != "yes" {
+			fmt.Println("Thanks for playing")
+			break
+		}
+	}
+}
+
+func handleGame(reader *bufio.Reader) {
+	min, max := 1, 100
+	randomNumber := rand.Intn(max-min+1) + min
+
+	maxAttempts := handleDifficulty(reader)
+
+	fmt.Printf("\nGuess a number between %d and %d\n", min, max)
+	fmt.Printf("You have %d attempts.\n\n", maxAttempts)
+
+	for attempts := 1; attempts <= maxAttempts; attempts++ {
+		fmt.Printf("Attempt %d/%d - Enter your guess: ", attempts, maxAttempts)
 
 		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error reading input. Please try again.")
+			fmt.Println("Error reading input.")
+			attempts--
 			continue
 		}
 
@@ -35,7 +53,8 @@ func main() {
 
 		guess, err := strconv.Atoi(input)
 		if err != nil {
-			fmt.Println("Please enter a valid number")
+			fmt.Println("Please enter a valid number.")
+			attempts--
 			continue
 		}
 
@@ -44,14 +63,37 @@ func main() {
 		} else if guess < randomNumber {
 			fmt.Println("Your guess is smaller than the random number. Try again")
 		} else {
-			fmt.Printf("Congratulations you guessed the number! It took %d attempts for you to guess the number.", attemps)
+			fmt.Printf("\nCongratulations! You guessed the number in %d attempts!\n", attempts)
 			break
 		}
 
-		if attemps == 3 {
-			fmt.Println("Game over")
-			fmt.Printf("The correct number is %d\n", randomNumber)
-			break
+		if attempts == maxAttempts {
+			fmt.Println("\nGame over")
+			fmt.Printf("The correct number was %d\n", randomNumber)
+		}
+	}
+}
+
+func handleDifficulty(reader *bufio.Reader) int {
+	for {
+		fmt.Println("\nChoose difficulty:")
+		fmt.Println("1. Easy   (10 attempts)")
+		fmt.Println("1. Medium (5 attempts)")
+		fmt.Println("1. Hard   (3 attempts)")
+		fmt.Print("Enter choice:")
+
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		switch input {
+		case "1", "easy":
+			return 10
+		case "2", "medium":
+			return 5
+		case "3", "hard":
+			return 3
+		default:
+			fmt.Println("Invalid choise. Please try again.")
 		}
 	}
 }
