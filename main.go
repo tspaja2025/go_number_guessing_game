@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -14,7 +15,7 @@ import (
 type LeaderboardEntry struct {
 	Difficulty string `json:"difficulty"`
 	Attempts   int    `json:"attempts"`
-	Data       string `json:"date"`
+	Date       string `json:"date"`
 }
 
 // Store records for each difficulty
@@ -115,6 +116,29 @@ func handleDifficulty(reader *bufio.Reader) int {
 	}
 }
 
+func handleGetDifficultyName(difficultyCode int) string {
+	switch difficultyCode {
+	case 10:
+		return "easy"
+	case 5:
+		return "medium"
+	case 3:
+		return "hard"
+	default:
+		return "unknown"
+	}
+}
+
+func handleSortEntries(entries []LeaderboardEntry) {
+	for i := 0; i < len(entries)-1; i++ {
+		for j := i + 1; j < len(entries); j++ {
+			if entries[i].Attempts > entries[j].Attempts {
+				entries[i], entries[j] = entries[j], entries[i]
+			}
+		}
+	}
+}
+
 func handleLeaderboard() *Leaderboard {
 	return &Leaderboard{
 		Easy:    []LeaderboardEntry{},
@@ -122,4 +146,133 @@ func handleLeaderboard() *Leaderboard {
 		Hard:    []LeaderboardEntry{},
 		MaxSize: 10, // Keep top 10 scores per difficulty
 	}
+}
+
+func handleLoadLeaderboard(filename string) (*Leaderboard, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return handleLeaderboard(), nil
+		}
+		return nil, err
+	}
+	defer file.Close()
+
+	var leaderboard Leaderboard
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&leaderboard)
+	if err != nil {
+		return handleLeaderboard(), nil
+	}
+
+	if leaderboard.MaxSize == 0 {
+		leaderboard.MaxSize = 10
+	}
+
+	return &leaderboard, nil
+}
+
+func (leaderboard *Leaderboard) SaveLeaderboard(filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+
+	return encoder.Encode(leaderboard)
+}
+
+func (leaderboard *Leaderboard) AddEntry(difficulty string, attempts int) bool {
+	entry := LeaderboardEntry{
+		Difficulty: difficulty,
+		Attempts:   attempts,
+		Date:       time.Now().Format("2006-01-02 15:04:05"),
+	}
+
+	var entries *[]LeaderboardEntry
+	switch strings.ToLower(difficulty) {
+	case "easy":
+		entries = &leaderboard.Easy
+	case "medium":
+		entries = &leaderboard.Medium
+	case "hard":
+		entries = &leaderboard.Hard
+	default:
+		return false
+	}
+
+	currentBest := leaderboard.GetBestAttempt(difficulty)
+	if currentBest == 0 || attempts < currentBest {
+		*entries = append(*entries, entry)
+
+		handleSortEntries(*entries)
+
+		if len(*entries) > leaderboard.MaxSize {
+			*entries = (*entries)[:leaderboard.MaxSize]
+		}
+
+		return true
+	}
+
+	return false
+}
+
+func (leaderboard *Leaderboard) GetBestAttempt(difficulty string) int {
+	var entries []LeaderboardEntry
+	switch strings.ToLower(difficulty) {
+	case "easy":
+		entries = leaderboard.Easy
+	case "medium":
+		entries = leaderboard.Medium
+	case "hard":
+		entries = leaderboard.Hard
+	default:
+		return 0
+	}
+
+	if len(entries) == 0 {
+		return 0
+	}
+
+	return entries[0].Attempts
+}
+
+func (leaderboard *Leaderboard) LeaderboardDisplay() {
+	fmt.Println("\n", strings.Repeat("=", 50))
+	fmt.Println("LEADERBOARD")
+	fmt.Println(strings.Repeat("=", 50))
+
+	displayDifficulty := func(name string, entries []LeaderboardEntry) {
+		if len(entries) == 0 {
+			fmt.Printf("\n%s: No records yet\n", strings.Title(name))
+			return
+		}
+
+		fmt.Printf("\n %s Difficulty (Best: %d attempts)\n", strings.Title(name), entries[0].Attempts)
+		fmt.Println(strings.Repeat("-", 40))
+
+		for i, entry := range entries {
+			medal := ""
+			switch i {
+			case 0:
+				medal = "🥇 "
+			case 1:
+				medal = "🥈 "
+			case 2:
+				medal = "🥉 "
+			default:
+				medal = "  "
+			}
+			fmt.Printf("%s#%d: %d attempts (%s)\n", medal, i+1, entry.Attempts, entry.Date)
+		}
+	}
+
+	displayDifficulty("easy", leaderboard.Easy)
+	displayDifficulty("medium", leaderboard.Medium)
+	displayDifficulty("hard", leaderboard.Hard)
+
+	fmt.Println(strings.Repeat("=", 50))
 }
