@@ -10,6 +10,21 @@ import (
 	"time"
 )
 
+// Represents a single leaderboard record
+type LeaderboardEntry struct {
+	Difficulty string `json:"difficulty"`
+	Attempts   int    `json:"attempts"`
+	Data       string `json:"date"`
+}
+
+// Store records for each difficulty
+type Leaderboard struct {
+	Easy    []LeaderboardEntry `json:"easy"`
+	Medium  []LeaderboardEntry `json:"medium"`
+	Hard    []LeaderboardEntry `json:"hard"`
+	MaxSize int                `json:"max_size"` // Top N entries
+}
+
 func main() {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 	reader := bufio.NewReader(os.Stdin)
@@ -95,5 +110,14 @@ func handleDifficulty(reader *bufio.Reader) int {
 		default:
 			fmt.Println("Invalid choise. Please try again.")
 		}
+	}
+}
+
+func handleLeaderboard() *Leaderboard {
+	return &Leaderboard{
+		Easy:    []LeaderboardEntry{},
+		Medium:  []LeaderboardEntry{},
+		Hard:    []LeaderboardEntry{},
+		MaxSize: 10, // Keep top 10 scores per difficulty
 	}
 }

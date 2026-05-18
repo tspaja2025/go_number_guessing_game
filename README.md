@@ -3,6 +3,10 @@
 A simple command-line number guessing game built with Go.
 This application allows player to guess a number between 1 and 100.
 
+## Roadmap.sh beginner project
+This project was created as a part of Number Guessing Game beginner project.
+Check out the project details [roadmap.sh](https://roadmap.sh/projects/number-guessing-game)
+
 ## Features
 
 ---
@@ -68,10 +72,8 @@ This project was built to practice:
 
 This project is open source and available under the MIT License.
 
-## Roadmap.sh beginner project
-This project was created as a part of Number Guessing Game beginner project.
-Check out the project details [roadmap.sh](https://roadmap.sh/projects/task-tracker)
+---
 
 9. Each guess should display a timer how long it took to guess the number
 10. There should be a hint system that provides clues to the player if they are stuck
-11. Player highscore tracking (i.e., the fewest number of attempts it took to guess the number under a specific difficulty level)
+11. Player leaderboard (i.e., the fewest number of attempts it took to guess the number under a specific difficulty level)
