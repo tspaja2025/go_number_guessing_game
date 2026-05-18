@@ -74,11 +74,11 @@ Check out the project details [roadmap.sh](https://roadmap.sh/projects/task-trac
 
 1. On game start display welcome message with the rules of the game
 2. Player selects difficulty level (easy, medium, hard). Difficulty levels determine how many number of changes player get to guess the number 
-3. Number is selected randomly between 1 and 100
-4. Player input
-5. If the guess is correct, the game displays a congratulatory message with the number of attempts it took to guess the number
-6. If the guess is incorrect, the game displays a message indicating whether the number is greater or less than the players guess
-7. The game ends when the player guesses the correct number or runs out of changes
+3. Number is selected randomly between 1 and 100 -done
+4. Player input -done
+5. If the guess is correct, the game displays a congratulatory message with the number of attempts it took to guess the number -done
+6. If the guess is incorrect, the game displays a message indicating whether the number is greater or less than the players guess -done
+7. The game ends when the player guesses the correct number or runs out of changes -done
 8. Player should be able to play multiple rounds of the game (i.e., until player decides to quit)
 9. Each guess should display a timer how long it took to guess the number
 10. There should be a hint system that provides clues to the player if they are stuck
